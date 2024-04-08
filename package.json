@@ -1,6 +1,6 @@
 {
     "name": "wurm",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "description": "The smallest web framework.",
     "main": "./src/index.js",
     "types": "./src/index.d.ts",
@@ -20,7 +20,8 @@
     "files": [
         "README.md",
         "src",
-        "LICENSE"
+        "LICENSE",
+        "wurm.webp"
     ],
     "exports": {
         ".": {
@@ -28,7 +29,7 @@
             "types": "./src/index.d.ts"
         }
     },
-    "devDependencies": {
-    },
-    "repository": "https://github.com/trombecher/wurm"
+    "devDependencies": {},
+    "repository": "https://github.com/trombecher/wurm",
+    "dependencies": {}
 }

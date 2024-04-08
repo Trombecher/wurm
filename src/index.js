@@ -4,6 +4,17 @@ function Box(value) {
 }
 
 let
+    // Box
+    Box_get = box => box.v,
+    Box_set = (box, value, oldValue = box.v) => value !== box.v &&
+        (box.v = value, box.l[forEach](listener => listener(value, oldValue))),
+    Box_attach = (box, listener) => (box.l.add(listener), listener),
+    Box_detach = (box, listener) => {
+        box.l.delete(listener);
+    },
+    Box_derive = (box, transform, newBox = new Box(transform(box.v))) =>
+        (Box_attach(box, (value, oldValue) => newBox.v = transform(value, oldValue)), newBox),
+
     // Aliasing
     setAttributeOnElement = (element, key, value) => element.setAttribute(key, value),
     isInstanceOf = (test, prototype) => test instanceof prototype,
@@ -16,17 +27,6 @@ let
     _Array = Array,
     forEach = "forEach",
 
-    // Box
-    Box_get = box => box.v,
-    Box_set = (box, value, oldValue = box.v) => value !== box.v &&
-        (box.v = value, box.l[forEach](listener => listener(value, oldValue))),
-    Box_attach = (box, listener) => (box.l.add(listener), listener),
-    Box_detach = (box, listener) => {
-        box.l.delete(listener);
-    },
-    Box_derive = (box, transform, newBox = new Box(transform(box.v))) =>
-        (Box_attach(box, (value, oldValue) => newBox.v = transform(value, oldValue)), newBox),
-
     // Inserting
     Box_insertToString = (box, transform = x => x, textNode = createText(transform(box.v))) =>
         (Box_attach(box, (value, oldValue) => textNode.textContent = transform(value, oldValue)), textNode),
@@ -36,12 +36,11 @@ let
             traverseAndRender(transform(element), node => end.before(node));
         }), [start, transform(box.v), end]),
 
-    // JSX
     traverseAndRender = (element, callback) => isInstanceOf(element, _Node)
-        ? callback(element)
+        ? callback(element) // Call the callback with the node.
         : isInstanceOf(element, _Array)
-            ? element[forEach](element => traverseAndRender(element, callback))
-            : element && callback("" + element),
+            ? element[forEach](element => traverseAndRender(element, callback)) // Call recursively for children
+            : element && callback("" + element), // To string if element
 
     mount = (target, element) => traverseAndRender(element, node => target.append(node)),
 
