@@ -1,0 +1,34 @@
+{
+    "name": "wurm",
+    "version": "0.0.0",
+    "description": "The smallest web framework.",
+    "main": "./src/index.js",
+    "types": "./src/index.d.ts",
+    "keywords": [
+        "wurm",
+        "ui",
+        "reactive",
+        "components",
+        "performance",
+        "state",
+        "small"
+    ],
+    "scripts": {},
+    "author": "Tobias Hillemanns",
+    "license": "ISC",
+    "type": "module",
+    "files": [
+        "README.md",
+        "src",
+        "LICENSE"
+    ],
+    "exports": {
+        ".": {
+            "default": "./src/index.js",
+            "types": "./src/index.d.ts"
+        }
+    },
+    "devDependencies": {
+    },
+    "repository": "https://github.com/trombecher/wurm"
+}
