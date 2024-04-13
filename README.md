@@ -4,7 +4,7 @@
 
 The smallest web framework, written in JavaScript. Features:
 
-- 🪶 Ultra-lightweight (**~915B** minified and **~700B** minified+gzipped)
+- 🪶 Ultra-lightweight (**~849B** minified and **~600B** minified+gzipped)
 - 🦅 Unopinionated
 - ✅ Type definitions
 - ❌ No dependencies
