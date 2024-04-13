@@ -1,44 +1,42 @@
-function Box(value) {
+function State(value) {
     this.l = new Set;
     this.v = value;
 }
 
 let
-    // Box
-    Box_get = box => box.v,
-    Box_set = (box, value, oldValue = box.v) => value !== box.v &&
-        (box.v = value, box.l[forEach](listener => listener(value, oldValue))),
-    Box_attach = (box, listener) => (box.l.add(listener), listener),
-    Box_detach = (box, listener) => {
-        box.l.delete(listener);
+    // State
+    getState = state => state.v,
+    setState = (state, value, oldValue = state.v) => value !== state.v &&
+        (state.v = value, state.l[forEach](listener => listener(value, oldValue))),
+    deriveState = (state, transform, newState = new State(transform(state.v))) =>
+        (attach(state, (value, oldValue) => newState.v = transform(value, oldValue)), newState),
+    attach = (state, listener) => (state.l.add(listener), listener),
+    detach = (state, listener) => {
+        state.l.delete(listener);
     },
-    Box_derive = (box, transform, newBox = new Box(transform(box.v))) =>
-        (Box_attach(box, (value, oldValue) => newBox.v = transform(value, oldValue)), newBox),
 
     // Aliasing
     setAttributeOnElement = (element, key, value) => element.setAttribute(key, value),
     isInstanceOf = (test, prototype) => test instanceof prototype,
     _document = document,
-    createText = (text = "") => _document.createTextNode(text),
+    createText = text => _document.createTextNode(text || ""),
     nextSibling = element => element.nextSibling,
-    _Object = Object,
-    _Node = Node,
     createElementString = "createElement",
-    _Array = Array,
     forEach = "forEach",
 
     // Inserting
-    Box_insertToString = (box, transform = x => x, textNode = createText(transform(box.v))) =>
-        (Box_attach(box, (value, oldValue) => textNode.textContent = transform(value, oldValue)), textNode),
-    Box_insert = (box, transform, start = createText(), end = createText()) =>
-        (Box_attach(box, element => {
+    insertStateToString = (state, transform = x => x, textNode = createText(transform(state.v))) =>
+        (attach(state, (value, oldValue) => textNode.textContent = transform(value, oldValue)), textNode),
+
+    insertState = (state, transform, start = createText(), end = createText()) =>
+        (attach(state, element => {
             while(nextSibling(start) !== end) nextSibling(start).remove();
             traverseAndRender(transform(element), node => end.before(node));
-        }), [start, transform(box.v), end]),
+        }), [start, transform(state.v), end]),
 
-    traverseAndRender = (element, callback) => isInstanceOf(element, _Node)
+    traverseAndRender = (element, callback) => isInstanceOf(element, Node)
         ? callback(element) // Call the callback with the node.
-        : isInstanceOf(element, _Array)
+        : isInstanceOf(element, Array)
             ? element[forEach](element => traverseAndRender(element, callback)) // Call recursively for children
             : element && callback("" + element), // To string if element
 
@@ -49,24 +47,22 @@ let
             _,
             tag,
             element
-        ) => (firstChildOrAttributes, ...children) => (
+        ) => (attributes, ...children) => (
             element = namespace
                 ? _document[createElementString + "NS"](namespace, tag)
                 : _document[createElementString](tag),
 
-                !isInstanceOf(firstChildOrAttributes, _Node) && !_Array.isArray(firstChildOrAttributes) && isInstanceOf(firstChildOrAttributes, _Object)
-                    ? _Object.entries(firstChildOrAttributes)[forEach](([key, value]) => key[0] === "_"
-                        ? (key = key.slice(1), setAttributeOnElement(
-                            element,
-                            key,
-                            isInstanceOf(value, Box)
-                                ? (Box_attach(value => setAttributeOnElement(element, key, value)), value.v)
-                                : value
-                        ))
-                        : element[key] = isInstanceOf(value, Box)
-                            ? (Box_attach(value => element[key] = value), value.v)
-                            : value)
-                    : children.unshift(firstChildOrAttributes),
+                Object.entries(attributes | {})[forEach](([key, value]) => key[0] === "_"
+                    ? (key = key.slice(1), setAttributeOnElement(
+                        element,
+                        key,
+                        isInstanceOf(value, State)
+                            ? (attach(value => setAttributeOnElement(element, key, value)), value.v)
+                            : value
+                    ))
+                    : element[key] = isInstanceOf(value, State)
+                        ? (attach(value => element[key] = value), value.v)
+                        : value),
 
                 mount(element, children),
                 element
@@ -76,14 +72,14 @@ let
     svgTags = createProxy("http://www.w3.org/2000/svg");
 
 export {
-    Box,
-    Box_get,
-    Box_set,
-    Box_attach,
-    Box_detach,
-    Box_derive,
-    Box_insertToString,
-    Box_insert,
+    State,
+    getState,
+    setState,
+    attach,
+    detach,
+    deriveState,
+    insertState,
+    insertStateToString,
     mount,
     tags,
     svgTags

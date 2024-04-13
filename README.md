@@ -50,14 +50,20 @@ This framework is very small, so the docs fit right into the README.
 You can create elements by destructuring the tag names from the `tags` (or `svgTags`, for SVG namespace) export and calling them:
 
 ```js
-import {tags, svgTags} from "wurm";
+import {tags} from "wurm";
 
 let {div} = tags;
 
-mount(document.body, div("Hi"));
+mount(document.body, div({}, "Hi"));
 ```
 
 Those return nodes, but you can insert any valid value. Component handling is up to you :). You can append/add/mount elements to containers via the `mount` function.
+
+#### Arguments
+
+Arguments are passed as a `Record` (object) into the first argument of the element function. If no children succeed it, it can be omitted.
+
+All properties you want to end up being assigned to the JavaScript object (like `onclick` or `type`) are not modified, but all properties, that should end up as attributes on the HTML element are prefixed with `_`, like `_d` on a path element.
 
 ### State
 
