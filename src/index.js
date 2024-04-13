@@ -9,7 +9,7 @@ let
     setState = (state, value, oldValue = state.v) => value !== state.v &&
         (state.v = value, state.l[forEach](listener => listener(value, oldValue))),
     deriveState = (state, transform, newState = new State(transform(state.v))) =>
-        (attach(state, (value, oldValue) => newState.v = transform(value, oldValue)), newState),
+        (attach(state, (value, oldValue) => setState(newState, transform(value, oldValue))), newState),
     attach = (state, listener) => (state.l.add(listener), listener),
     detach = (state, listener) => {
         state.l.delete(listener);
@@ -52,16 +52,16 @@ let
                 ? _document[createElementString + "NS"](namespace, tag)
                 : _document[createElementString](tag),
 
-                Object.entries(attributes | {})[forEach](([key, value]) => key[0] === "_"
+                Object.entries(attributes || {})[forEach](([key, value]) => key[0] === "_"
                     ? (key = key.slice(1), setAttributeOnElement(
                         element,
                         key,
                         isInstanceOf(value, State)
-                            ? (attach(value => setAttributeOnElement(element, key, value)), value.v)
+                            ? (attach(value, value => setAttributeOnElement(element, key, value)), value.v)
                             : value
                     ))
                     : element[key] = isInstanceOf(value, State)
-                        ? (attach(value => element[key] = value), value.v)
+                        ? (attach(value, value => element[key] = value), value.v)
                         : value),
 
                 mount(element, children),
